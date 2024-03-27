@@ -10,14 +10,14 @@ const account1 = {
   pin: 1111,
 
   movementsDates: [
-    "2023-11-18T21:31:17.178Z",
-    "2023-12-23T07:42:02.383Z",
+    "2024-01-18T21:31:17.178Z",
+    "2024-01-23T07:42:02.383Z",
     "2024-01-28T09:15:04.904Z",
-    "2024-04-01T10:17:24.185Z",
-    "2024-05-08T14:11:59.604Z",
-    "2024-05-27T17:01:17.194Z",
-    "2024-07-11T23:36:17.929Z",
-    "2024-07-12T10:51:36.790Z",
+    "2024-02-01T10:17:24.185Z",
+    "2024-02-08T14:11:59.604Z",
+    "2024-03-23T17:01:17.194Z",
+    "2024-03-24T23:36:17.929Z",
+    "2024-03-27T10:51:36.790Z",
   ],
   currency: "EUR",
   locale: "pt-PT", // de-DE
@@ -71,6 +71,24 @@ const inputLoanAmount = document.querySelector(".form__input--loan-amount");
 const inputCloseUsername = document.querySelector(".form__input--user");
 const inputClosePin = document.querySelector(".form__input--pin");
 
+//# function for date formating
+const formatMovementsDate = function (date) {
+  const calcDaysPassed = (date1, date2) =>
+    Math.round(Math.abs(date2 - date1) / (1000 * 60 * 60 * 24));
+
+  const daysPassed = calcDaysPassed(new Date(), date);
+  if (daysPassed === 0) return "Today";
+  if (daysPassed === 1) return "Yesterday";
+  if (daysPassed <= 7) return `${daysPassed} days ago`;
+  else {
+    // return actual date
+    const day = `${date.getDate()}`.padStart(2, 0);
+    const month = `${date.getMonth() + 1}`.padStart(2, 0);
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+};
+
 //# to display money-related data
 const displayMovements = function (acc, sort = false) {
   containerMovements.innerHTML = ""; // to clean old data from ui before to insert new one
@@ -84,10 +102,7 @@ const displayMovements = function (acc, sort = false) {
     const type = mov > 0 ? "deposit" : "withdrawal";
 
     const date = new Date(acc.movementsDates[i]);
-    const day = `${date.getDate()}`.padStart(2, 0);
-    const month = `${date.getMonth() + 1}`.padStart(2, 0);
-    const year = date.getFullYear();
-    const displayDate = `${day}/${month}/${year}`;
+    const displayDate = formatMovementsDate(date);
 
     const html = `
       <div class="movements__row">
