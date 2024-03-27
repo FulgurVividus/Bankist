@@ -19,7 +19,7 @@ const account1 = {
     "2024-03-24T23:36:17.929Z",
     "2024-03-27T10:51:36.790Z",
   ],
-  currency: "EUR",
+  currency: "USD",
   locale: "en-US", // de-DE
 };
 
@@ -39,7 +39,7 @@ const account2 = {
     "2024-06-25T18:49:59.371Z",
     "2024-07-26T12:01:20.894Z",
   ],
-  currency: "USD",
+  currency: "GDP",
   locale: "en-GB",
 };
 
@@ -87,8 +87,17 @@ const formatMovementsDate = function (date, locale) {
     // const year = date.getFullYear();
     // return `${day}/${month}/${year}`;
 
+    // (internationalizing dates)
     return new Intl.DateTimeFormat(locale).format(date);
   }
+};
+
+//# function for currency formatting (internationalizing)
+const formatCur = function (value, locale, currency) {
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: currency,
+  }).format(value);
 };
 
 //# to display money-related data
@@ -106,13 +115,16 @@ const displayMovements = function (acc, sort = false) {
     const date = new Date(acc.movementsDates[i]);
     const displayDate = formatMovementsDate(date, acc.locale);
 
+    // internationalizing numbers
+    const formattedMov = formatCur(mov, acc.locale, acc.currency);
+
     const html = `
       <div class="movements__row">
           <div class="movements__type movements__type--${type}">${
       i + 1
     } ${type}</div>
           <div class="movements__date">${displayDate}</div>
-          <div class="movements__value">${mov.toFixed(2)}€</div>
+          <div class="movements__value">${formattedMov}</div>
       </div>
     `;
 
@@ -125,7 +137,7 @@ const calcDisplayBalance = function (acc) {
   acc.balance = acc.movements.reduce(function (acc, mov) {
     return acc + mov;
   }, 0);
-  labelBalance.textContent = `${acc.balance.toFixed(2)}€`;
+  labelBalance.textContent = formatCur(acc.balance, acc.locale, acc.currency);
 };
 
 //# function for summary calculations
@@ -133,19 +145,27 @@ const calcDisplaySummary = function (account) {
   const incomes = account.movements
     .filter((mov) => mov > 0)
     .reduce((acc, mov) => acc + mov, 0);
-  labelSumIn.textContent = `${incomes.toFixed(2)}€`;
+  labelSumIn.textContent = formatCur(incomes, account.locale, account.currency);
 
   const out = account.movements
     .filter((mov) => mov < 0)
     .reduce((acc, mov) => acc + mov, 0);
-  labelSumOut.textContent = `${Math.abs(out).toFixed(2)}€`;
+  labelSumOut.textContent = formatCur(
+    Math.abs(out),
+    account.locale,
+    account.currency
+  );
 
   const interest = account.movements
     .filter((mov) => mov > 0)
     .map((deposit) => (deposit * account.interestRate) / 100)
     .filter((int, i, arr) => int >= 1)
     .reduce((acc, int) => acc + int, 0);
-  labelSumInterest.textContent = `${interest.toFixed(2)}€`;
+  labelSumInterest.textContent = formatCur(
+    interest,
+    account.locale,
+    account.currency
+  );
 };
 
 //# function for making the initials of usernames
@@ -197,7 +217,7 @@ btnLogin.addEventListener("click", function (e) {
     containerApp.style.opacity = 100;
 
     // Date
-    // day/month/year
+    // day/month/year (internationalizing dates)
     const now = new Date();
     const options = {
       hour: "numeric",
