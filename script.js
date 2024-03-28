@@ -192,13 +192,42 @@ const updateUI = function (acc) {
   calcDisplaySummary(acc);
 };
 
+//# function for logout
+const startLogOutTimer = function () {
+  // Set timer to 5 minutes
+  let time = 300;
+
+  const tick = function () {
+    const min = String(Math.trunc(time / 60)).padStart(2, 0);
+    const sec = String(time % 60).padStart(2, 0);
+
+    // In each call, print the remaining time to UI
+    labelTimer.textContent = `${min}:${sec}`;
+
+    // When 0 seconds, stop timer and logout user
+    if (time === 0) {
+      clearInterval(timer);
+      labelWelcome.textContent = `Log in to get started`;
+      containerApp.style.opacity = 0;
+    }
+
+    // Decrease 1second
+    time--;
+  };
+
+  // Call the timer every second
+  tick();
+  const timer = setInterval(tick, 1000);
+  return timer;
+};
+
 //# Event handlers for login
-let currentAccount;
+let currentAccount, timer;
 
 //# FAKE ALWAYS LOGGED IN
-currentAccount = account1;
-updateUI(currentAccount);
-containerApp.style.opacity = 100;
+// currentAccount = account1;
+// updateUI(currentAccount);
+// containerApp.style.opacity = 100;
 
 btnLogin.addEventListener("click", function (e) {
   e.preventDefault();
@@ -245,6 +274,10 @@ btnLogin.addEventListener("click", function (e) {
     inputLoginPin.value = "";
     inputLoginPin.blur();
 
+    // calling logout function
+    if (timer) clearInterval(timer);
+    timer = startLogOutTimer();
+
     // update movements, balance , summary
     updateUI(currentAccount);
   } else {
@@ -277,6 +310,10 @@ btnTransfer.addEventListener("click", function (e) {
 
     // update movements, balance , summary
     updateUI(currentAccount);
+
+    // Reset timer
+    clearInterval(timer);
+    timer = startLogOutTimer();
   }
 
   // clean the inputs
@@ -303,6 +340,10 @@ btnLoan.addEventListener("click", function (e) {
 
       // Update UI
       updateUI(currentAccount);
+
+      // Reset timer
+      clearInterval(timer);
+      timer = startLogOutTimer();
     }, 2500);
     alert(`💆‍♂️Waiting...`);
   } else {
